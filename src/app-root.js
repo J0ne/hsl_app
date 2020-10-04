@@ -2,7 +2,7 @@ import { customElement, property, LitElement, html, css } from 'lit-element';
 
 @customElement('hsl-app')
 export class HslApp extends LitElement {
-  @property() message = 'TODO...'; 
+  @property() message = 'TODO'; 
 
   static get styles() {
     return css`
@@ -28,7 +28,7 @@ export class HslApp extends LitElement {
   render() {
     return html`
       <div class="wrapper">
-        <h1>HäSLä</h1>
+        <h1>HSL app</h1>
           ${this.message}
         </a>
       </div>
