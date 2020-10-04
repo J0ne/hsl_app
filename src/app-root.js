@@ -1,8 +1,8 @@
 import { customElement, property, LitElement, html, css } from 'lit-element';
 
-@customElement('app-root')
-export class AppRoot extends LitElement {
-  @property() message = 'Learn LitElement';
+@customElement('hsl-app')
+export class HslApp extends LitElement {
+  @property() message = 'TODO...'; 
 
   static get styles() {
     return css`
@@ -28,14 +28,7 @@ export class AppRoot extends LitElement {
   render() {
     return html`
       <div class="wrapper">
-        <h1>LitElement + Snowpack</h1>
-        <p>Edit <code>src/app-root.js</code> and save to reload.</p>
-        <a
-          class="link"
-          href="https://lit-element.polymer-project.org/"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
+        <h1>HäSLä</h1>
           ${this.message}
         </a>
       </div>
