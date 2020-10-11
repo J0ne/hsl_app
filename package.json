@@ -7,6 +7,9 @@
     "lint": "prettier --check \"src/**/*.js\""
   },
   "dependencies": {
+    "@material/mwc-drawer": "^0.19.1",
+    "@material/mwc-icon-button": "^0.19.1",
+    "@material/mwc-top-app-bar": "^0.19.1",
     "lit-element": "^2.3.1",
     "lit-html": "^1.2.1"
   },
