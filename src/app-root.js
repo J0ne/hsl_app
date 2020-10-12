@@ -4,16 +4,20 @@ import "@material/mwc-icon-button";
 import "@material/mwc-top-app-bar";
 @customElement("app-root")
 export class AppRoot extends LitElement {
+
+  static get properties() {
+    return {
+      Map: { type: Object }
+    };
+  }
   static get styles() {
     return css`
       body {
         height: 100vh;
       }
-
       .drawer-content {
         padding: 0px 16px 0 16px;
       }
-
       .main-content {
         min-height: 300px;
         padding: 48px 18px 0 18px;
@@ -21,22 +25,14 @@ export class AppRoot extends LitElement {
       h1 {
         font-size: 4rem;
       }
-      .wrapper {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        flex-direction: column;
-        height: 100vh;
-        background-color: #2196f3;
-        background: linear-gradient(315deg, #b4d2ea 0%, #444b0a 100%);
-        font-size: 24px;
-      }
       .link {
         color: white;
       }
     `;
   }
-
+  constructor(){
+    super();
+  }
   render() {
     return html`
       <mwc-drawer hasHeader type="modal">
@@ -61,47 +57,13 @@ export class AppRoot extends LitElement {
             ></mwc-icon-button>
           </mwc-top-app-bar>
           <div class="main-content">
-            <p>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-              eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
-              enim ad minim veniam, quis nostrud exercitation ullamco laboris
-              nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in
-              reprehenderit in voluptate velit esse cillum dolore eu fugiat
-              nulla pariatur. Excepteur sint occaecat cupidatat non proident,
-              sunt in culpa qui officia deserunt mollit anim id est laborum.
-            </p>
-            <p>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-              eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
-              enim ad minim veniam, quis nostrud exercitation ullamco laboris
-              nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in
-              reprehenderit in voluptate velit esse cillum dolore eu fugiat
-              nulla pariatur. Excepteur sint occaecat cupidatat non proident,
-              sunt in culpa qui officia deserunt mollit anim id est laborum.
-            </p>
-            <p>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-              eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
-              enim ad minim veniam, quis nostrud exercitation ullamco laboris
-              nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in
-              reprehenderit in voluptate velit esse cillum dolore eu fugiat
-              nulla pariatur. Excepteur sint occaecat cupidatat non proident,
-              sunt in culpa qui officia deserunt mollit anim id est laborum.
-            </p>
-            <p>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-              eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
-              enim ad minim veniam, quis nostrud exercitation ullamco laboris
-              nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in
-              reprehenderit in voluptate velit esse cillum dolore eu fugiat
-              nulla pariatur. Excepteur sint occaecat cupidatat non proident,
-              sunt in culpa qui officia deserunt mollit anim id est laborum.
-            </p>
+            <slot name="map-container"></slot>
           </div>
         </div>
       </mwc-drawer>
     `;
   }
+
   firstUpdated() {
     const drawer = this.renderRoot.querySelectorAll("mwc-drawer")[0];
     if (drawer) {
@@ -110,5 +72,15 @@ export class AppRoot extends LitElement {
         drawer.open = !drawer.open;
       });
     }
+
+    const m = this.L.Marker.movingMarker([
+      [60.192859, 24.925831], 
+      [60.192089, 24.940831], 
+      [60.192089, 24.943838]
+    ], [1000, 5000, 3000], {
+      autostart: true,
+      keepInView: true,
+    }).addTo(this.Map);
+    m.start();
   }
 }
