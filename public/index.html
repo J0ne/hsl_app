@@ -16,8 +16,6 @@
            <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
              integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
              crossorigin=""></script>
-
-    <script type="text/javascript" src="http://ewoken.github.io/Leaflet.MovingMarker/MovingMarker.js"></script>
     <title>HSL App</title>
   </head>
   <style>
@@ -37,22 +35,21 @@
     <script type="module" src="/_dist_/index.js"></script>
         <script>
           const mapContainer = document.getElementById("map");
-          const map = L.map(mapContainer).setView([60.192059, 24.945831], 15);
+          const map = L.map(mapContainer).setView([60.192059, 24.945831], 12);
           var normalTiles = L.tileLayer(
             "https://cdn.digitransit.fi/map/v1/{id}/{z}/{x}/{y}.png", {
               attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
                 '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
-              maxZoom: 17,
+              maxZoom: 19,
               tileSize: 512,
               zoomOffset: -1,
               id: "hsl-map",
             }
           ).addTo(map);
-          const marker1 = L.Marker.movingMarker([[60.192059, 24.945831], [60.42059, 24.945731]], [10000]).addTo(map);
+          
           const appRoot = document.getElementsByTagName('app-root')[0];
-          appRoot.Map = map;
+          appRoot.map = map;
           appRoot.L = L;
-          //appRoot.makeMarker = (fromTo, duration, options ) => L.Marker.movingMarker(fromTo,duration, options);
         </script>
     <!--
       This HTML file is a template.
