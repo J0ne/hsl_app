@@ -7,11 +7,19 @@
     "lint": "prettier --check \"src/**/*.js\""
   },
   "dependencies": {
+    "@material/mwc-button": "^0.19.1",
     "@material/mwc-drawer": "^0.19.1",
     "@material/mwc-icon-button": "^0.19.1",
+    "@material/mwc-list": "^0.19.1",
+    "@material/mwc-select": "^0.19.1",
+    "@material/mwc-switch": "^0.19.1",
     "@material/mwc-top-app-bar": "^0.19.1",
+    "Leaflet-MovingMaker": "0.0.1",
+    "igniteui-webcomponents-core": "^1.1.6",
+    "igniteui-webcomponents-gauges": "^1.1.6",
     "lit-element": "^2.3.1",
-    "lit-html": "^1.2.1"
+    "lit-html": "^1.2.1",
+    "socket.io": "^2.3.0"
   },
   "devDependencies": {
     "@babel/plugin-proposal-class-properties": "^7.10.4",
