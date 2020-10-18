@@ -1,11 +1,11 @@
 import { LitElement, html, css } from "lit-element";
 import { ModuleManager } from "igniteui-webcomponents-core";
-// Bullet Graph Module
-import { IgcRadialGaugeCoreModule } from "igniteui-webcomponents-gauges";
-import { IgcRadialGaugeModule } from "igniteui-webcomponents-gauges";
+// // Bullet Graph Module
+// import { IgcRadialGaugeCoreModule } from "igniteui-webcomponents-gauges";
+// import { IgcRadialGaugeModule } from "igniteui-webcomponents-gauges";
 
-// register the modules
-ModuleManager.register(IgcRadialGaugeCoreModule, IgcRadialGaugeModule);
+// // register the modules
+// ModuleManager.register(IgcRadialGaugeCoreModule, IgcRadialGaugeModule);
 
 class VehicleInfo extends LitElement {
   static get properties() {
@@ -15,6 +15,7 @@ class VehicleInfo extends LitElement {
       dlIndicator: { type: Number },
       route: { type: String },
       operator: { type: Number },
+      gauge: { type: Object}
     };
   }
 
@@ -22,12 +23,49 @@ class VehicleInfo extends LitElement {
     super();
     this.speed = 0;
   }
-
+ firstUpdated() {
+     const gauge = new RadialGauge({
+       renderTo: this.shadowRoot.querySelector("canvas"),
+       width: 150,
+       height: 150,
+       units: "Km/h",
+       minValue: 0,
+       maxValue: 120,
+       majorTicks: ["0", "20", "40", "60", "80", "100", "120"],
+       minorTicks: 2,
+       strokeTicks: true,
+       highlights: [
+         {
+           from: 100,
+           to: 120,
+           color: "rgba(200, 50, 50, .75)",
+         },
+       ],
+       colorPlate: "#fff",
+       borderShadowWidth: 0,
+       borders: false,
+       needleType: "arrow",
+       needleWidth: 2,
+       needleCircleSize: 7,
+       needleCircleOuter: true,
+       needleCircleInner: false,
+       animationDuration: 1000,
+       animationRule: "linear",
+     }).draw();
+     this.gauge = gauge;
+ }
+  updated(changedProps){
+    if(changedProps.get('speed')){
+        console.log('changed props')
+        this.gauge.value = this.speed;
+    }
+  }
   render() {
+    
     return html`
-      <igc-radial-gauge
-        height="200px"
-        width="200px"
+      <!-- <igc-radial-gauge
+        height="150px"
+        width="150px"
         scale-start-angle="135"
         scale-end-angle="45"
         scale-brush="DodgerBlue"
@@ -41,7 +79,8 @@ class VehicleInfo extends LitElement {
         maximum-value="120"
         interval="10"
       >
-      </igc-radial-gauge>
+      </igc-radial-gauge> -->
+      <canvas id="gauge1"></canvas>
     `;
   }
 }
