@@ -12,7 +12,8 @@ export class AppRoot extends LitElement {
     return {
       map: { type: Object },
       vehicles: { type: Array },
-      selectedVehicle: { type: Object }
+      selectedVehicle: { type: Object },
+      selectedVehicles: { type: Array}
     };
   }
   static get styles() {
@@ -27,9 +28,6 @@ export class AppRoot extends LitElement {
         min-height: 300px;
         padding: 0px 18px 0 18px;
       }
-      .select-area {
-        padding: 20px;
-      }
       h1 {
         font-size: 4rem;
       }
@@ -38,15 +36,16 @@ export class AppRoot extends LitElement {
       }
       .tram-popup {
         font: bolder;
-      }
-      .tram-popup:before {
-        content: url(https://image.flaticon.com/icons/svg/75/75245.svg);
-      }
-      .tram-popup {
         text-align: center;
       }
-      .vehicle-area{
-        display: inline-flex;
+      .vehicle-area {
+        display: flex;
+        max-height: 150px;
+        padding: 5px;
+        border: 1px solid grey;
+      }
+      .vehicle-area-item {
+        max-height: 150px;
       }
     `;
   }
@@ -61,6 +60,7 @@ export class AppRoot extends LitElement {
       alert(e.detail);
     });
     this.selectedVehicle = null;
+    this.selectedVehicles = [];
   }
 
   render() {
@@ -86,37 +86,29 @@ export class AppRoot extends LitElement {
               @click=${() => this.setPlace()}
               icon="place"
             ></mwc-icon-button>
-            <mwc-icon-button slot="actionItems" icon="tram"></mwc-icon-button>
-            <mwc-icon-button
-              slot="actionItems"
-              icon="directions_railway"
-            ></mwc-icon-button>
-            <mwc-icon-button
-              slot="actionItems"
-              icon="directions_subway"
-            ></mwc-icon-button>
-            <mwc-icon-button
-              slot="actionItems"
-              icon="directions_bus"
-            ></mwc-icon-button>
-            <mwc-icon-button
-              slot="actionItems"
-              icon="directions_boat"
-            ></mwc-icon-button>
           </mwc-top-app-bar>
           <div class="main-content">
-            <div class="select-area">
-              <div class="vehicle-area">
-                <vehicle-selector
-                  .handleCallback=${this.handleSelect.bind(this)}
-                ></vehicle-selector>
-                ${this.selectedVehicle
-                  ? html`<vehicle-info
-                      .speed=${this.selectedVehicle.spd}
+            <div class="vehicle-area">
+              <vehicle-selector
+                class="vehicle-area-item"
+                .handleCallback=${this.handleSelect.bind(this)}
+              ></vehicle-selector>
+              ${this.selectedVehicle
+                ? html`<vehicle-info
+                    class="vehicle-area-item"
+                    .speed=${this.selectedVehicle.speed}
+                  ></vehicle-info>`
+                : ""}
+              ${this.selectedVehicles.length > 0
+                ? this.selectedVehicles.map(
+                    (vehicle) => html`<vehicle-info
+                      class="vehicle-area-item"
+                      .speed=${vehicle.speed}
                     ></vehicle-info>`
-                  : ""}
-              </div>
+                  )
+                : html`<p>No vehicles selected</p>`}
             </div>
+
             <slot name="map-container"></slot>
           </div>
         </div>
@@ -131,6 +123,7 @@ export class AppRoot extends LitElement {
   async handleSelect(type) {
     this.postVehicleType(type);
     this.vehicles = [];
+    this.selectedVehicles = [];
     const keys = Object.keys(this.markerGroup._layers);
     keys.forEach((key) => {
       this.markerGroup.removeLayer(key);
@@ -142,31 +135,48 @@ export class AppRoot extends LitElement {
     this.map.on("popupopen", (e) =>{
        this.map.panTo(e.popup._latlng, { animate: true, duration: 1 });
        
-       this.selectedVehicle = this.vehicles.find( v => v.vehicleId === e.popup._source.id);
+       //this.selectedVehicle = this.vehicles.find( v => v.vehicleId === e.popup._source.id);
+       this.selectedVehicles.push(this.vehicles.find( v => v.vehicleId === e.popup._source.id))
        console.log(this.selectedVehicle);
-       if(this.selectedVehicle){
-         this.requestUpdate();
-       }
+       this.requestUpdate();
     });
     this.map.on('popupclose', e => this.selectedVehicle = null);
     this.markerGroupId = this.markerGroup._leaflet_id;
     console.log(this.markerGroup);
-    this.socket.on(VEHICLE_EVENT, (msg) => {
-      const msgObj = JSON.parse(msg).VP;
+    this.socket.on(VEHICLE_EVENT, (vehicleDTO) => {
 
-      if (!msgObj || !msgObj.lat || !msgObj.long) return;
-      const dest = [msgObj.lat, msgObj.long];
-      if (!this.vehicles.find((v) => v.id === msgObj.veh)) {
-        const vehicle = this.setMarker(dest, dest, msgObj);
-        vehicle.id = msgObj.veh;
-
+      console.log(vehicleDTO);
+      if (!this.vehicles.find((v) => v.id === vehicleDTO.veh)) {
+        // eka merkki: from = to
+        const vehicle = this.setMarker(
+          vehicleDTO.location, // from
+          vehicleDTO.location, // to
+          vehicleDTO
+        );
+        vehicle.id = vehicleDTO.veh;
       } else {
-        const vehicleToUpdate = this.vehicles.find((v) => v.id === msgObj.veh);
-        if(this.selectedVehicle && this.selectedVehicle._leaflet_id === vehicleToUpdate._leaflet_id){
-          this.selectedVehicle.spd = Math.round((msgObj.spd * 60 * 60) / 1000);
+        const vehicleToUpdate = this.vehicles.find(
+          (v) => v.id === vehicleDTO.veh
+        );
+
+        // is selected
+        const selected = this.selectedVehicles.find(
+          (v) => v._leaflet_id === vehicleToUpdate._leaflet_id
+        );
+        if (selected) {
+          selected.speed = vehicleDTO.speed;
           this.requestUpdate();
         }
-        vehicleToUpdate.moveTo(dest, 2000);
+        // if (
+        //   this.selectedVehicle &&
+        //   this.selectedVehicle._leaflet_id === vehicleToUpdate._leaflet_id
+        // ) {
+        //   this.selectedVehicle.spd = Math.round(
+        //     (msgObj.spd * 60 * 60) / 1000
+        //   );
+        //   this.requestUpdate();
+        // }
+        vehicleToUpdate.moveTo(vehicleDTO.location, 2000);
       }
     });
   }
@@ -204,13 +214,9 @@ export class AppRoot extends LitElement {
       keepInView: true,
     })
       .bindPopup(
-        `<div class="tram-popup ${msgObj.dl < 0 ? "red" : "green"}"><p>${
-          msgObj.desi
-        }</p>
-        <p>${msgObj.route}</p><p>${Math.round(
-          (msgObj.spd * 60 * 60) / 1000
-        )} km/h </p>
-        <strong>${msgObj.veh}</strong>
+        `<div class="tram-popup ${msgObj.dl < 0 ? "red" : "green"}">
+        <mwc-icon-button slot="actionItems" icon="tram"></mwc-icon-button>
+          <strong>${msgObj.routeNumber}</strong>
         </div>`
       )
       .openPopup();
