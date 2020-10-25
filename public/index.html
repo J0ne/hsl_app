@@ -4,11 +4,13 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
-    <link rel="preload" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" as="style" type="text/css">
+    <!-- <link rel="preload" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" as="style" type="text/css">
     <link rel="preload" href="https://fonts.googleapis.com/css?family=Material+Icons&display=block" as="style"
-      type="text/css">
-    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css?family=Material+Icons&display=block" rel="stylesheet">
+      type="text/css"> -->
+    <link rel="preload" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" rel="stylesheet">
+    <link rel="preload" href="https://fonts.googleapis.com/css?family=Material+Icons&display=block" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css">
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.1/dist/leaflet.css"
           integrity="sha512-Rksm5RenBEKSKFjgI3a41vrjkw4EVPlJ3+OiI65vTjIdo9brlAacEuKOiQ5OFh7cOI1bkDwLqdLw3Zg0cRJAAQ=="
@@ -16,7 +18,7 @@
            <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
              integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
              crossorigin=""></script>
-             <script src="//cdn.rawgit.com/Mikhus/canvas-gauges/gh-pages/download/2.1.7/radial/gauge.min.js"></script>
+             <script src="//cdn.rawgit.com/Mikhus/canvas-gauges/gh-pages/download/2.1.7/all/gauge.min.js"></script>
 
     <title>HSL App</title>
   </head>
@@ -37,7 +39,7 @@
     <script type="module" src="/_dist_/index.js"></script>
         <script>
           const mapContainer = document.getElementById("map");
-          const map = L.map(mapContainer).setView([60.192059, 24.945831], 12);
+          const map = L.map(mapContainer).setView([60.192059, 24.945831], 13);
           var normalTiles = L.tileLayer(
             "https://cdn.digitransit.fi/map/v1/{id}/{z}/{x}/{y}.png", {
               attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
