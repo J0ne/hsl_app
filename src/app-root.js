@@ -13,13 +13,16 @@ export class AppRoot extends LitElement {
       map: { type: Object },
       vehicles: { type: Array },
       selectedVehicle: { type: Object },
-      selectedVehicles: { type: Array}
+      selectedVehicles: { type: Array },
     };
   }
   static get styles() {
     return css`
       body {
         height: 100vh;
+      }
+      .map-area {
+        width: auto;
       }
       .drawer-content {
         padding: 0px 16px 0 16px;
@@ -40,12 +43,12 @@ export class AppRoot extends LitElement {
       }
       .vehicle-area {
         display: flex;
-        max-height: 150px;
+        max-height: 400px;
         padding: 5px;
         border: 1px solid grey;
       }
       .vehicle-area-item {
-        max-height: 150px;
+        max-height: 350px;
       }
     `;
   }
@@ -56,15 +59,18 @@ export class AppRoot extends LitElement {
     this.vehicleLayer = [];
     this.markerGroup = null;
     this.markerGroupId = null;
-    this.addEventListener("vehicle-selected", (e) => {
-      alert(e.detail);
-    });
     this.selectedVehicle = null;
     this.selectedVehicles = [];
+    this.addEventListener("vehicleinfo-clicked", (e) => {
+      const vehicleMarker = this.vehicles.find(
+        (v) => v.vehicleId === e.detail.id
+      );
+      if (vehicleMarker){
+        vehicleMarker._popup._source.openPopup();
+      }
+    });
   }
-
   render() {
-    console.log("render");
     return html`
       <mwc-drawer hasHeader type="modal">
         <span slot="title">Drawer Title</span>
@@ -93,23 +99,23 @@ export class AppRoot extends LitElement {
                 class="vehicle-area-item"
                 .handleCallback=${this.handleSelect.bind(this)}
               ></vehicle-selector>
-              ${this.selectedVehicle
-                ? html`<vehicle-info
-                    class="vehicle-area-item"
-                    .speed=${this.selectedVehicle.speed}
-                  ></vehicle-info>`
-                : ""}
               ${this.selectedVehicles.length > 0
                 ? this.selectedVehicles.map(
                     (vehicle) => html`<vehicle-info
                       class="vehicle-area-item"
+                      .id=${vehicle.id}
                       .speed=${vehicle.speed}
+                      .route=${vehicle.route}
+                      .status=${vehicle.dl}
+                      .operatorName=${vehicle.operatorName}
                     ></vehicle-info>`
                   )
-                : html`<p>No vehicles selected</p>`}
+                : ""}
             </div>
-
-            <slot name="map-container"></slot>
+            <div class="map-area">
+              <slot name="map-container"></slot>
+            </div>
+            <div></div>
           </div>
         </div>
       </mwc-drawer>
@@ -129,53 +135,55 @@ export class AppRoot extends LitElement {
       this.markerGroup.removeLayer(key);
     });
   }
-
+  isSelected(id) {
+    return !!this.selectedVehicles.find((sv) => sv.id === id);
+  }
   initMessageHandler() {
     this.markerGroup = L.layerGroup().addTo(this.map);
-    this.map.on("popupopen", (e) =>{
-       this.map.panTo(e.popup._latlng, { animate: true, duration: 1 });
-       
-       //this.selectedVehicle = this.vehicles.find( v => v.vehicleId === e.popup._source.id);
-       this.selectedVehicles.push(this.vehicles.find( v => v.vehicleId === e.popup._source.id))
-       console.log(this.selectedVehicle);
-       this.requestUpdate();
-    });
-    this.map.on('popupclose', e => this.selectedVehicle = null);
-    this.markerGroupId = this.markerGroup._leaflet_id;
-    console.log(this.markerGroup);
-    this.socket.on(VEHICLE_EVENT, (vehicleDTO) => {
+    this.map.on("popupopen", (e) => {
+      this.map.panTo(e.popup._latlng, { animate: true, duration: 1 });
 
-      console.log(vehicleDTO);
-      if (!this.vehicles.find((v) => v.id === vehicleDTO.veh)) {
+      //this.selectedVehicle = this.vehicles.find( v => v.vehicleId === e.popup._source.id);
+      if (!this.isSelected(e.popup._source.id)) {
+        const selectedVehicle = this.vehicles.find(
+          (v) => v.id === e.popup._source.id
+        );
+        this.selectedVehicles.push(selectedVehicle);
+      }
+
+      this.requestUpdate();
+    });
+    this.map.on("popupclose", (e) => (this.selectedVehicle = null));
+    this.markerGroupId = this.markerGroup._leaflet_id;
+
+    this.socket.on(VEHICLE_EVENT, (vehicleDTO) => {
+      //console.log(vehicleDTO);
+      if (!this.vehicles.find((v) => v.id === vehicleDTO.id)) {
         // eka merkki: from = to
         const vehicle = this.setMarker(
           vehicleDTO.location, // from
           vehicleDTO.location, // to
           vehicleDTO
         );
-        vehicle.id = vehicleDTO.veh;
+        vehicle.id = vehicleDTO.id;
       } else {
         const vehicleToUpdate = this.vehicles.find(
-          (v) => v.id === vehicleDTO.veh
+          (v) => v.id === vehicleDTO.id
         );
 
         // is selected
-        const selected = this.selectedVehicles.find(
+        const selectedIndex = this.selectedVehicles.findIndex(
           (v) => v._leaflet_id === vehicleToUpdate._leaflet_id
         );
-        if (selected) {
-          selected.speed = vehicleDTO.speed;
+        if (selectedIndex > -1) {
+          this.selectedVehicles[selectedIndex].speed = vehicleDTO.speed;
+          this.selectedVehicles[selectedIndex].dl = vehicleDTO.dl;
+          this.selectedVehicles[selectedIndex].operatorName =
+            vehicleDTO.operatorName;
+          this.selectedVehicles[selectedIndex].route = vehicleDTO.route;
+
           this.requestUpdate();
         }
-        // if (
-        //   this.selectedVehicle &&
-        //   this.selectedVehicle._leaflet_id === vehicleToUpdate._leaflet_id
-        // ) {
-        //   this.selectedVehicle.spd = Math.round(
-        //     (msgObj.spd * 60 * 60) / 1000
-        //   );
-        //   this.requestUpdate();
-        // }
         vehicleToUpdate.moveTo(vehicleDTO.location, 2000);
       }
     });
@@ -205,7 +213,6 @@ export class AppRoot extends LitElement {
       body: JSON.stringify(data),
     });
     let result = await response.json();
-    console.log(result);
   }
 
   setMarker(from, to, msgObj) {
@@ -216,11 +223,11 @@ export class AppRoot extends LitElement {
       .bindPopup(
         `<div class="tram-popup ${msgObj.dl < 0 ? "red" : "green"}">
         <mwc-icon-button slot="actionItems" icon="tram"></mwc-icon-button>
-          <strong>${msgObj.routeNumber}</strong>
+          <strong>${msgObj.route}</strong>
         </div>`
       )
       .openPopup();
-    m.vehicleId = msgObj.veh;
+    m.vehicleId = msgObj.id;
     this.vehicles.push(m);
     m.addTo(this.markerGroup);
     m.start();
