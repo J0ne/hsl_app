@@ -7,9 +7,11 @@
     "lint": "prettier --check \"src/**/*.js\""
   },
   "dependencies": {
+    "@material/card": "^7.0.0",
     "@material/mwc-button": "^0.19.1",
     "@material/mwc-drawer": "^0.19.1",
     "@material/mwc-icon-button": "^0.19.1",
+    "@material/mwc-icon-button-toggle": "^0.19.1",
     "@material/mwc-list": "^0.19.1",
     "@material/mwc-select": "^0.19.1",
     "@material/mwc-switch": "^0.19.1",
@@ -19,6 +21,7 @@
     "igniteui-webcomponents-gauges": "^1.1.6",
     "lit-element": "^2.3.1",
     "lit-html": "^1.2.1",
+    "material-components-web": "^7.0.0",
     "socket.io": "^2.3.0"
   },
   "devDependencies": {
